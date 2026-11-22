@@ -34,11 +34,31 @@ Server:        python3 -m http.server 8899   (iz parent foldera projekta)
 
 **Direktorijum se zove `tablica/` i to se NE menja** — ime proizvoda ne mora biti ime direktorijuma, a prebacivanje bi pokvarilo lokalni URL.
 
-**Deploy: nema lokalnog web servera.** Vidi sekciju o deploy-u ispod.
+**Deploy: `https://kartice.sokak.app/`** (postavljeno 22.11.2026.). Hosting je isti
+cPanel add-on domen kao `sokak.app` i `start.sokak.app` — folder `~/kartice.sokak.app/`
+Pristupni podaci (server, korisnik, ključ) su u **privatnom secret-store van projekta** —
+**nikad u repou, nikad u deploy sadržaju, nikad u ovom fajlu**.
 
-**Domeni (provereno 17.11.2026. preko DNS SOA / RDAP):** `kartice.rs` zauzeto, `kartice.com` zauzeto, `kartice.app` / `kartice.io` / `kartice.dev` / `kartice.sokak.app` slobodno.
+Deploy je `rsync` **bez `--delete`** — folder pripada cPanel panelu i sadrži
+`cgi-bin/` i `.well-known/acme-challenge/` (za obnovu SSL-a), koji bi se
+izbrisali. Vidi skill `open-source-web-publishing`.
 
-**Git: projekat je u zasebnom repou.** Vidi sekciju o repou ispod.
+`.htaccess` je isporučen sa sajtom: no-cache za CSS/JS/HTML, 7 dana za slike.
+
+**Domeni (provereno 17.11.2026. preko DNS SOA / RDAP):** `kartice.rs` zauzato, `kartice.com` zauzato, `kartice.app` / `kartice.io` / `kartice.dev` / `kartice.sokak.app` slobodno → **odabrano `kartice.sokak.app`**, SSL važi do 20.02.2027.
+
+**Git: JAVNI REPO `github.com/banegrbic/kartice`** (22.11.2026.). Grana `master`,
+MIT licenca. Struktura: `index.html`, `css/`, `js/`, `test/`, `docs/` (screenshotovi),
+`README.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `LICENSE`, `PROJEKT.md`,
+`.htaccess`, `.gitignore`.
+
+**GitHub About panel je zapravo README**; kratki `description` (142 znaka, jedan
+red — GitHub odbija nove redove) ide u naslov pretraživača. `gh repo edit
+--body-file` nije dostupan u ovoj verziji `gh`; GraphQL `updateRepository`
+mutation radi, ali sa istim ograničenjem na nove redove.
+
+**Pravilo (22.11.2026.):** svaka izmena projekta mora da ažurira i `PROJEKT.md`
+i skill `tablica-app`, i da se zabeleži u istoriji promena.
 
 ---
 
@@ -54,8 +74,8 @@ Server:        python3 -m http.server 8899   (iz parent foldera projekta)
 ### Struktura fajlova (stanje 22.11.2026., reorganizovano)
 
 ```
-index.html               332 lin.   shell: masthead + 3 viewa + settings drawer + colophon
-css/style.css            887 lin.   dizajn-tokeni, tema, responsive
+index.html               338 lin.   shell: masthead + 3 viewa + settings drawer + colophon
+css/style.css            900 lin.   dizajn-tokeni, tema, responsive
 js/fsrs.js               553 lin.   FSRS-6 scheduler (port, bez zavisnosti)
 js/storage.js            293 lin.   cookie store: base64url + chunking + fallback
 js/deck-registry.js      516 lin.   UGOOVOR DEKA + registar + generički defaultovi
@@ -68,6 +88,13 @@ js/state.js              869 lin.   stanje, red čekanja, integracija FSRS-a, st
 js/app.js               1028 lin.   UI kontroler, routing, renderovanje, pomoć, kviz
 test/app.test.mjs       1394 lin.   unit + integracioni + randomizacija
 test/fsrs.diff.test.mjs  265 lin.   diferencijalni test vs ts-fsrs v6.0.0
+README.md                 157 lin.   javni landing page (About panel na GitHub-u)
+CONTRIBUTING.md           94 lin.   kako doprinositi
+CODE_OF_CONDUCT.md        48 lin.   kodeks ponašanja
+LICENSE                            MIT © 2026 Bane Grbić
+.htaccess                         cache-control + preusmerenje bez www
+.gitignore                        secrets/, kljucevi, backup fajlovi
+docs/                               screenshotovi (5 PNG) za README
 PROJEKT.md                           ← ovaj fajl
 ```
 
@@ -639,6 +666,10 @@ Zato je:
 | 22.11.2026. | ~~**Podskaz na svim paketima**~~ — **NAPRAVLJENO istog dana, vidi stavku ispod.** (Prva verzija: dugme „Podskaz", taster `H`, opisna pomoć koja ne otkriva odgovor.) |
 | 22.11.2026. | **Kviz za paket `akordi`** — 4 ponuđena odgovora umesto polja za unos; klik ocenjuje se kao ukucani odgovor. Novi ugovor deka: `choices(card)` + `hideLabelInQuiz`. Distraktori: isti koren druge vrste, ista vrsta drugog korena, i pogrešan u oba. Redosled fiksiran po kartici. 79→93 test grupe. |
 | 22.11.2026. | **Hiperlinkovi za FSRS-6** u uvodnom tekstu („Kako funkcioniše") — zvanični wiki (`#fsrs-6`, čiji se 21 parametar poklapa sa našim `DEFAULT_W`) i Anki FAQ (objašnjenje modela pamćenja). |
+| 22.11.2026. | **Open source + javni repo** — projekat objavljen kao `github.com/banegrbic/kartice` (javno, MIT, grana `master`). Dodati `README.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `LICENSE`, `.htaccess`, `.gitignore`, `docs/` sa 5 screenshotova. Kolofon sajta dobio „otvoreni kod — GitHub" i „portfolio: sokak.app" (oba linka poravnata desno u drugoj grupi). |
+| 22.11.2026. | **Popravljen CSS bug: kolofon uži od sadržaja** — `.colophon` je flex item u kolonskom `.app-shell`, pa je `margin: 0 auto` skupljao na 589px umesto 1160px (sadržaj je bio 1160px). Rešenje: `width: 100%` uz `max-width`, isto kao `.main`. Provereno merenjem oba bloka: 1160 = 1160. |
+| 22.11.2026. | **Deploy na `https://kartice.sokak.app/`** — rsync **bez `--delete`** (folder pripada cPanel panelu: `cgi-bin/` i `.well-known/acme-challenge/` se ne smeju brisati). Sve 11 JS/CSS asseta vraćaju 200, SSL validan do 20.02.2027, browser potvrđuje 4 paketa / 616 kartica / 0 JS grešaka. |
+| 22.11.2026. | **About na GitHub-u preuređen** — kratki `description` (142 znaka, jedan red) umesto 1535-znakovnog spljoštenog prosa koji je zauzimao naslov pretraživača. README dobio „Za koga je", „Kako radi, u pet koraka", opis šta se uči u svakom paketu, i pojašnjen „Pomoć"/kviz/statistika. |
 | 22.11.2026. | **REORGANIZACIJA: svaki paket u zasebnom fajlu** — `js/decks.js` (662 lin., mešao engine i 3 tabela paketa) podeljen na `js/deck-registry.js` (ugovor + registar + generički defaultovi, 516 lin.) i **jedan fajl po paketu**: `js/deck-tablica-mnozenje.js` (114), `js/deck-tablica-deljenje.js` (110), `js/deck-tablica.js` (118), `js/deck-akordi.js` (preimenovan iz `js/decks-chords.js`, 802). Svaki paket se sam prijavljuje `Decks.register()`; redosled na sajtu = redosled script tagova u `index.html`. `js/decks.js` **obrisan**. Zahtev: „svi deckovi kartica u zasebnim fajlovima, da mnogo više deckova ne utiče na brzinu učitavanja i stabilnost koda". |
 | 22.11.2026. | **Čišćenje mrtvog koda** — obrisano: CSS `.grid-c` (mapa koristi `.grid-lg .cell`), CSS `.card-input-suffix` (nigde se ne koristi), CSS token `--gap` (definisan, nekorišćen), `EXTENSION` u `js/deck-akordi.js` (nekorišćen), `FLAT` u `js/deck-akordi.js` (duplikat `flats` mape u `normaliseSymbol`), `INIT_S_MAX` i `decayInfo` u `js/fsrs.js` (mrtvo). Nema mrtvih funkcija ni promenljivih u celom projektu (provereno skriptom). |
 | 22.11.2026. | **Revidiran „Pomoć" (korisničke korekcije): (1) „Podskaz" → **„Pomoć"** (taster `H` → `P`); (2) „Pomoć" sada **otkriva tačan odgovor** (`card.back`) umesto opisne pomoći — obrisani `Decks.hintFor()`, `defaultHint()`, `multiplicationHint()`, `divisionHint()`, `chordHint()` i polje `hint(card)` iz ugovora deka; preimenovanja `hintUsed`→`helpUsed`, `breakdown.hinted`→`breakdown.helped`; u kvizu se dodatno markira tačno dugme (`.correct`); (3) uklonjen hiperlink „FSRS-6 raspored" — fraza je sada samo *italic*; (4) uklonjen ukupan broj „Na čekanju" iz `.lede` i `max-width: 62ch` — tekst se razvlači od leve do desne margine. 93→90 test grupa. |
