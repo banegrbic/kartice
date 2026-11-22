@@ -36,3 +36,6 @@ Thumbs.db
 /tmp/
 scratch/
 *.log
+
+# Lokalni symlink na scratch referentnu biblioteku (ts-fsrs) — NE u javni repo
+fsrs-ref
