@@ -20,6 +20,22 @@ Pravi se **FSRS-6** (Free Spaced Repetition Scheduler) implementacija, koja je
 diferencijalno testirana protiv reference biblioteke `ts-fsrs` v6.0.0 — 463
 randomizovane sekvence, nula neslaganja.
 
+### Za koga je
+
+Za nekog ko uči napamet i ne želi da se prijavi nigde: otvoriš stranicu,
+odabereš paket i učiš. Sve ostaje na tvom uređaju, i niko ne vidi šta učiš.
+
+### Kako radi, u pet koraka
+
+1. **Izabereš paket** — tablica množenja, tablica deljenja, ili gitarski akordi.
+2. **Odgovaraš** — unosom sa tastature, izborom ili kvizom (za akorde).
+3. **Ocenuješ** koliko si se zadržao na kartici: opet, teško, dobro, lako.
+4. **Raspored radi za tebe** — FSRS-6 izračunava kada se kartica vraća.
+5. **Vidiš napredak** — statistika, mapa i „najteže kartice".
+
+Ako ne znaš odgovor, pritisneš **„Pomoć"**: otkrije tačan odgovor, ne donosi
+poene, ali kartica se i dalje rasporeduje — bila je pregledana, samo ne vredi.
+
 ## Screenshotovi
 
 | Paketi karata | Učenje — kviz sa akordima |
@@ -32,12 +48,14 @@ randomizovane sekvence, nula neslaganja.
 
 ## Paketi karata
 
-| Paket | Kartica | Opis |
+Svaki paket je zasebna cela tema — izabereš jedan i učiš ga do kraja.
+
+| Paket | Kartica | Šta učiš |
 |---|---|---|
-| Tablica množenja | 100 | samo množenje 1–10 × 1–10 |
-| Tablica deljenja | 100 | obrnuta tablica |
-| Množenje i deljenje | 200 | kompletna tablica u jednom paketu |
-| Gitarski akordi | 216 | 12 osnovnih tonova × 18 vrsta akorda |
+| Tablica množenja | 100 | množenje 1–10 × 1–10 — samo množenje |
+| Tablica deljenja | 100 | deljenje 1–10 ÷ 1–10 — samo deljenje |
+| Množenje i deljenje | 200 | kompletna tablica, množenje i deljenje u jednom paketu |
+| Gitarski akordi | 216 | 12 osnovnih tonova × 18 vrsta akorda — sve što sviraš na gitari |
 
 Svih **216 akorda** je provereno na pravoj gitari: tonovi koje oblik svira
 jesu tačno tonovi akorda, osnovni ton je u basu, oblik stane u četiri praga.
@@ -47,20 +65,34 @@ i jedne razlike.
 Akordi se uče **u redosledu početniku pristojan**: prvo osnovni otvoreni
 (Em Am C G D A E Dm), pa najteža dvojica klasične desetke (F Bm), pa
 dominantne sedmice, pa male sedmice, i tek na kraju bar akordi i egzotika.
+Dnevni limit je 6 novih akordi — svaki oblik se uči danima, ne satima.
 
 ## Šta je još u aplikaciji
 
-- **„Pomoć"** na svakoj kartici — otkriva tačan odgovor. Ne donosi poene, ali
-  kartica se i dalje rasporeduje: bila je pregledana, samo ne vredi.
-- **Kviz** za akorde — četiri ponuđena odgovora, tačno jedan ispravan.
-- **Statistika** — tačnost, vreme, efikasnost, retencija, i mapa napretka.
-- **Tema** — svetla („papir") i tamna („škola").
-- **Izvoz** progresa u JSON.
+- **„Pomoć"** — dugme na svakoj kartici koje otkriva tačan odgovor kad ga ne
+  znaš. Ne donosi poene, ali kartica se i dalje rasporeduje: bila je
+  pregledana, samo ne vredi.
+- **Kviz** (samo za akorde) — umesto da sam upišeš odgovor, biraš jedan od
+  četiri ponuđena odgovora; tačno jedan je ispravan.
+- **Statistika** — tačnost, vreme odgovora, efikasnost učenja, predviđena
+  retencija, i mapa napretka po temi.
+- **„Najteže kartice"** — koje ti najviše smetaju, sa dijagramom akorda.
+- **Tema** — svetla („papir") i tamna („škola"), prebacuje se dugmetom gore.
+- **Izvoz** — preuzmeš ceo progres u JSON fajl.
 
 ## Tehnologija
 
 Čist **HTML, CSS i JavaScript**. Bez framework-a, bez build procesa, bez
 runtime zavisnosti, bez servera. Otvori `index.html` i radi.
+
+**Arhitektura — svaka tema u zasebnom fajlu.** Svaki paket kartica ima svoj
+fajl i sam se prijavljuje (`Decks.register()`). Motor — raspored, ocene,
+statistika, prikaz — **ne zna ništa o temi**, pa nema mesta gde bi se
+napravio greška specifična za jedan paket.
+
+Dodavanje nove teme znači **jedan novi fajl i jedan red u `index.html`** —
+nikad izmena motora, nikad prepisivanja postojećeg koda. Zato ovaj projekat
+može da primi neograničen broj tema bez da postane spor ili nestabilan.
 
 ```
 index.html               shell: masthead + 3 viewa + podešavanja
@@ -77,10 +109,6 @@ js/state.js              stanje, red čekanja, statistika
 js/app.js                UI kontroler, routing, renderovanje
 test/                    unit i diferencijalni test
 ```
-
-**Arhitektura:** svaki paket kartica je u **zasebnom fajlu** i sam se
-prijavljuje (`Decks.register()`). Motor ne zna ništa o temi. Dodavanje nove
-teme znači: novi fajl i jedan red u `index.html` — nikad izmena motora.
 
 ## Razvoj
 
