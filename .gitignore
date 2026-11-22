@@ -1,0 +1,38 @@
+# SSH ključevi i kredencijali — NIKAD ne commitovati
+secrets/
+*.pem
+*.key
+*.ppk
+id_rsa
+id_ed25519
+.env
+.env.*
+*.netrc
+
+# Backup fajlovi
+*.bak.*
+*.backup.*
+
+# Node / package manager (projekat nema build proces, ali neka ostane cisto)
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Lokalni alati i skripte za proveru
+/tmp/
+scratch/
+*.log

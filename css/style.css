@@ -1,0 +1,900 @@
+/* ==========================================================================
+   Kartice — stylesheet
+
+   Visual language: editorial / technical-manual.
+   Paper and ink rather than glass and glow; hairline rules rather than
+   boxes; one accent colour used sparingly; numbers in tabular monospace.
+   Each deck brings its own graphic motif — the multiplication table is one
+   of them, not the app's only subject.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tokens
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Type families. Serif for display, grotesque for UI, mono for data. */
+  --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino,
+           Georgia, "Liberation Serif", "Times New Roman", serif;
+  --sans:  ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+           "Helvetica Neue", Arial, sans-serif;
+  --mono:  ui-monospace, "SF Mono", "JetBrains Mono", "Liberation Mono",
+           Menlo, Consolas, monospace;
+
+  /* Type scale */
+  --t-display: clamp(2.4rem, 1.1rem + 5.4vw, 4.2rem);
+  --t-h1:      clamp(1.45rem, 1.1rem + 1.4vw, 1.95rem);
+  --t-body:    1rem;
+  --t-small:   .8125rem;
+  --t-micro:   .6875rem;
+
+  /* Geometry — decisive, small radii. Not pills. */
+  --r: 3px;
+  --r-lg: 4px;
+  --rule-w: 1px;
+
+  --maxw: 1160px;
+
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --dur: 180ms;
+}
+
+/* Light — warm paper */
+[data-theme="light"] {
+  --paper:      #f7f5f0;
+  --paper-2:    #efebe1;
+  --paper-3:    #e6e1d4;
+  --ink:        #17160f;
+  --ink-2:      #55524a;
+  --ink-3:      #8b877c;
+  --rule:       #ddd8ca;
+  --rule-2:     #c5bfad;
+
+  --accent:     #c1442c;
+  --accent-2:   #a33924;
+  --on-accent:  #fbf9f5;
+
+  --c-again: #b3352a;
+  --c-hard:  #9a6a18;
+  --c-good:  #3d6b38;
+  --c-easy:  #2a5a7c;
+
+  --cell-unseen:   #e9e4d8;
+  --cell-learning: #e8c9b0;
+  --cell-young:    #dfd2a8;
+  --cell-mature:   #b9c9ae;
+  --cell-leech:    #dcb3ac;
+
+  --shadow-card: 0 1px 2px rgba(23, 22, 15, .10), 0 10px 28px -18px rgba(23, 22, 15, .30);
+  --shadow-pop:  0 2px 6px rgba(23, 22, 15, .12), 0 22px 50px -24px rgba(23, 22, 15, .40);
+}
+
+/* Dark — slate and bone */
+[data-theme="dark"] {
+  --paper:      #131311;
+  --paper-2:    #1b1b18;
+  --paper-3:    #232320;
+  --ink:        #f1eee5;
+  --ink-2:      #a8a397;
+  --ink-3:      #78746a;
+  --rule:       #2b2a25;
+  --rule-2:     #3d3b34;
+
+  --accent:     #e2603f;
+  --accent-2:   #f07a5b;
+  --on-accent:  #17150f;
+
+  --c-again: #e0685a;
+  --c-hard:  #d0a04e;
+  --c-good:  #7fae72;
+  --c-easy:  #74a8c9;
+
+  --cell-unseen:   #232320;
+  --cell-learning: #4a2f22;
+  --cell-young:    #453a1e;
+  --cell-mature:   #2f4430;
+  --cell-leech:    #4d2723;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, .5), 0 12px 30px -20px rgba(0, 0, 0, .8);
+  --shadow-pop:  0 2px 8px rgba(0, 0, 0, .55), 0 26px 60px -28px rgba(0, 0, 0, .9);
+}
+
+/* --------------------------------------------------------------------------
+   2. Reset
+   -------------------------------------------------------------------------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* The `hidden` attribute must beat any author `display` rule below. */
+[hidden] { display: none !important; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+/* Subtle paper texture: a very faint grid, like graph paper. */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, var(--rule) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: .16;
+}
+
+h1, h2, h3, h4 { margin: 0; font-weight: 600; line-height: 1.15; letter-spacing: -.01em; }
+p { margin: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
+
+.muted { color: var(--ink-2); }
+.small { font-size: var(--t-small); }
+
+/* The recurring micro-label: small, tracked-out, uppercase. */
+.label {
+  font-size: var(--t-micro);
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+
+kbd {
+  font-family: var(--mono);
+  font-size: .72em;
+  padding: .12em .4em;
+  border: var(--rule-w) solid var(--rule-2);
+  border-bottom-width: 2px;
+  border-radius: var(--r);
+  background: var(--paper-2);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+a { color: var(--accent); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r);
+}
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--ink); color: var(--paper); padding: 8px 14px;
+}
+.skip-link:focus { left: 0; }
+
+/* --------------------------------------------------------------------------
+   3. Shell
+   -------------------------------------------------------------------------- */
+
+.app-shell { min-height: 100%; display: flex; flex-direction: column; position: relative; z-index: 1; }
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 40px clamp(16px, 4vw, 40px) 96px;
+}
+
+.view { animation: enter 320ms var(--ease) both; }
+
+@keyframes enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* --------------------------------------------------------------------------
+   4. Masthead
+   -------------------------------------------------------------------------- */
+
+.masthead {
+  position: sticky; top: 0; z-index: 40;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: var(--rule-w) solid var(--rule);
+}
+
+.masthead-inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 40px);
+  height: 62px;
+  display: flex; align-items: center; gap: 28px;
+}
+
+.wordmark { display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: inherit; }
+
+.wordmark-mark {
+  width: 1.35rem; height: 1.35rem;
+  color: var(--accent);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: translateY(1px);
+}
+
+.wordmark-text { display: flex; flex-direction: column; line-height: 1.1; }
+.wordmark-text b {
+  font-family: var(--serif);
+  font-size: 1.16rem;
+  font-weight: 600;
+  letter-spacing: -.015em;
+}
+.wordmark-text small { font-size: var(--t-micro); color: var(--ink-3); letter-spacing: .01em; }
+
+.masthead-meta { margin-left: auto; display: flex; gap: 22px; }
+.meta-item { display: flex; flex-direction: column; line-height: 1.15; }
+.meta-item span { font-size: var(--t-micro); letter-spacing: .13em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.meta-item b { font-family: var(--mono); font-size: .95rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.masthead-actions { display: flex; gap: 6px; }
+
+.icon-btn {
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border: var(--rule-w) solid transparent;
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.icon-btn:hover { color: var(--ink); border-color: var(--rule); background: var(--paper-2); }
+
+[data-theme="dark"] .icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: none; }
+
+.rail { height: 2px; background: transparent; }
+.rail span {
+  display: block; height: 100%; width: 0;
+  background: var(--accent);
+  transition: width 700ms var(--ease);
+}
+
+/* --------------------------------------------------------------------------
+   5. Buttons
+   -------------------------------------------------------------------------- */
+
+.btn {
+  font: inherit; font-weight: 500;
+  border-radius: var(--r);
+  padding: 9px 16px;
+  cursor: pointer;
+  border: var(--rule-w) solid var(--rule-2);
+  background: var(--paper-2);
+  color: var(--ink);
+  transition: all var(--dur) var(--ease);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn:hover { border-color: var(--ink-3); background: var(--paper-3); }
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: var(--accent); border-color: var(--accent); color: var(--on-accent);
+}
+.btn-primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+
+.btn-quiet { background: transparent; border-color: transparent; color: var(--ink-2); padding-left: 0; }
+.btn-quiet:hover { color: var(--ink); background: transparent; border-color: transparent; text-decoration: underline; text-underline-offset: 3px; }
+
+.btn-danger { background: transparent; border-color: color-mix(in srgb, var(--c-again) 45%, transparent); color: var(--c-again); }
+.btn-danger:hover { background: color-mix(in srgb, var(--c-again) 10%, transparent); border-color: var(--c-again); }
+
+.btn-block { width: 100%; justify-content: center; }
+
+/* --------------------------------------------------------------------------
+   6. Deck list — editorial rows, not a grid of boxes
+   -------------------------------------------------------------------------- */
+
+.lede {
+  padding-bottom: 18px;
+  margin-bottom: 4px;
+  border-bottom: var(--rule-w) solid var(--rule);
+}
+.lede h1 { font-family: var(--serif); font-size: var(--t-h1); font-weight: 600; letter-spacing: -.02em; }
+.lede p { color: var(--ink-2); font-size: var(--t-small); margin-top: 6px; }
+
+/* A link inside running text has to look like one — underlined, and it
+   must not change the colour of the line around it on hover. */
+.lede p a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.lede p a:hover { text-decoration-color: var(--accent); }
+
+.deck-list { display: flex; flex-direction: column; }
+
+.deck-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 28px;
+  padding: 22px 0;
+  border-bottom: var(--rule-w) solid var(--rule);
+  transition: background-color var(--dur) var(--ease);
+}
+.deck-row:first-child { border-top: var(--rule-w) solid var(--rule); }
+.deck-row:hover { background: color-mix(in srgb, var(--paper-2) 55%, transparent); }
+
+.deck-row-main { min-width: 0; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; color: inherit; }
+.deck-row-title {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -.015em;
+  display: flex; align-items: baseline; gap: 10px;
+}
+.deck-row-title .count { font-family: var(--mono); font-size: .78rem; font-weight: 400; color: var(--ink-3); letter-spacing: 0; }
+.deck-row-desc { color: var(--ink-2); font-size: var(--t-small); margin-top: 4px; max-width: 46ch; }
+
+.deck-row-figures { display: flex; gap: 26px; }
+.figure { display: flex; flex-direction: column; gap: 1px; min-width: 62px; }
+.figure span { font-size: var(--t-micro); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.figure b { font-family: var(--mono); font-size: 1.02rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.deck-row-go { display: flex; align-items: center; gap: 10px; }
+.deck-row-go .status {
+  font-size: var(--t-micro); letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+  padding: 3px 8px; border-radius: var(--r);
+  border: var(--rule-w) solid var(--rule-2); color: var(--ink-3);
+}
+.deck-row-go .status.ready { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+
+/* --------------------------------------------------------------------------
+   7. The table grid — the motif
+   -------------------------------------------------------------------------- */
+
+.grid {
+  display: grid;
+  gap: 2px;
+  grid-template-columns: repeat(var(--cols, 10), var(--cell, 9px));
+  width: max-content;
+}
+
+/* The large, interactive version used on the statistics screen.
+   --map-cols is set by the renderer from the deck's map shape; the default
+   matches the multiplication table (10 columns plus the row headers). */
+.grid-lg {
+  display: grid;
+  gap: 3px;
+  grid-template-columns: repeat(var(--map-cols, 11), minmax(0, 1fr));
+  max-width: 620px;
+}
+
+.grid-lg .head {
+  font-family: var(--mono);
+  font-size: var(--t-micro);
+  color: var(--ink-3);
+  display: grid; place-items: center;
+  padding-bottom: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.grid-lg .cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--cell-unseen);
+  border: var(--rule-w) solid transparent;
+  display: grid; place-items: center;
+  font-family: var(--mono);
+  font-size: .62rem;
+  color: var(--ink-2);
+  cursor: default;
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  overflow: hidden;
+}
+.grid-lg .cell[data-tone="learning"] { background: var(--cell-learning); color: #5b3a24; }
+.grid-lg .cell[data-tone="young"]   { background: var(--cell-young);   color: #5b4a1e; }
+.grid-lg .cell[data-tone="mature"]  { background: var(--cell-mature);  color: #2c4729; }
+.grid-lg .cell[data-tone="leech"]   { background: var(--cell-leech);   color: #6d2a23; }
+.grid-lg .cell[data-tone="empty"]   { background: transparent; }
+.grid-lg .cell:hover { border-color: var(--ink-3); transform: scale(1.06); }
+
+[data-theme="dark"] .grid-lg .cell[data-tone="learning"] { color: #f0c9a8; }
+[data-theme="dark"] .grid-lg .cell[data-tone="young"]   { color: #e8d79b; }
+[data-theme="dark"] .grid-lg .cell[data-tone="mature"]  { color: #bcd8ae; }
+[data-theme="dark"] .grid-lg .cell[data-tone="leech"]   { color: #f0b3aa; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: var(--t-micro); color: var(--ink-2); letter-spacing: .04em; }
+.legend-swatch { width: 10px; height: 10px; border-radius: 1px; }
+
+/* --------------------------------------------------------------------------
+   8. Ledger — the "at a glance" figures
+   -------------------------------------------------------------------------- */
+
+.ledger {
+  margin-top: 44px;
+  border-top: var(--rule-w) solid var(--rule);
+}
+.ledger-head { display: flex; align-items: baseline; justify-content: space-between; padding: 18px 0 14px; }
+.ledger-head h2 { font-family: var(--serif); font-size: 1.05rem; font-weight: 600; }
+
+.ledger-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  border-top: var(--rule-w) solid var(--rule);
+  border-left: var(--rule-w) solid var(--rule);
+}
+.ledger-cell {
+  border-right: var(--rule-w) solid var(--rule);
+  border-bottom: var(--rule-w) solid var(--rule);
+  padding: 14px 16px;
+}
+.ledger-cell .label { display: block; margin-bottom: 5px; }
+.ledger-cell b {
+  font-family: var(--mono);
+  font-size: 1.42rem; font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+  line-height: 1;
+}
+.ledger-cell small { display: block; font-size: var(--t-micro); color: var(--ink-3); margin-top: 4px; }
+
+/* --------------------------------------------------------------------------
+   9. Study session
+   -------------------------------------------------------------------------- */
+
+.study-bar {
+  display: flex; align-items: center; gap: 20px;
+  padding-bottom: 14px;
+  border-bottom: var(--rule-w) solid var(--rule);
+  margin-bottom: 0;
+}
+.study-bar .deck-name { font-family: var(--serif); font-size: 1.12rem; font-weight: 600; }
+.study-bar .deck-sub { font-size: var(--t-micro); color: var(--ink-3); letter-spacing: .1em; text-transform: uppercase; }
+.study-bar .spacer { margin-left: auto; }
+
+.study-hud { display: flex; gap: 20px; }
+.study-hud .figure b { font-size: .95rem; }
+
+.study-progress { height: 2px; background: var(--rule); margin-bottom: 40px; }
+.study-progress span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 400ms var(--ease); }
+
+.card-stage { max-width: 640px; margin: 0 auto; }
+
+.flashcard { perspective: 1400px; }
+.flashcard-inner { position: relative; transform-style: preserve-3d; transition: transform 560ms var(--ease); }
+.flashcard.flipped .flashcard-inner { transform: rotateX(180deg); }
+
+.flashcard-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border: var(--rule-w) solid var(--rule-2);
+  border-radius: var(--r-lg);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+  padding: 44px 36px 36px;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 20px;
+  min-height: 300px;
+}
+.flashcard-back { position: absolute; inset: 0; transform: rotateX(180deg); }
+
+.card-question {
+  font-family: var(--serif);
+  font-size: var(--t-display);
+  font-weight: 600;
+  letter-spacing: -.03em;
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+}
+.card-question.back { color: var(--accent); }
+
+.card-input-row { display: flex; align-items: baseline; justify-content: center; gap: 10px; }
+
+.card-input {
+  font-family: var(--mono);
+  font-size: clamp(1.6rem, 1rem + 2.4vw, 2.2rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  width: min(230px, 60vw);
+  padding: 8px 16px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--rule-2);
+  border-radius: 0;
+  transition: border-color var(--dur) var(--ease);
+}
+.card-input::placeholder { color: var(--ink-3); opacity: .5; }
+.card-input:focus { outline: none; border-bottom-color: var(--accent); }
+.card-input.correct { border-bottom-color: var(--c-good); }
+.card-input.wrong { border-bottom-color: var(--c-again); }
+
+.card-feedback {
+  font-size: var(--t-small); font-weight: 500;
+  padding: 5px 12px; border-radius: var(--r);
+  border: var(--rule-w) solid transparent;
+  animation: enter 220ms var(--ease) both;
+}
+.card-feedback.good { color: var(--c-good); border-color: color-mix(in srgb, var(--c-good) 40%, transparent); }
+.card-feedback.bad  { color: var(--c-again); border-color: color-mix(in srgb, var(--c-again) 40%, transparent); }
+
+.reveal-btn { font: inherit; font-weight: 500; color: var(--ink-2); }
+.reveal-btn:hover { color: var(--ink); }
+
+.card-back-meta { color: var(--ink-2); font-size: var(--t-small); }
+
+/* The help button: a quiet button that, once pressed, reveals the answer. */
+.card-tools { margin-top: 22px; text-align: center; }
+
+.help-btn { font: inherit; font-weight: 500; color: var(--ink-2); }
+.help-btn:hover { color: var(--ink); }
+.help-btn[disabled] { color: var(--ink-3); cursor: default; }
+.help-btn[disabled]:hover { color: var(--ink-3); }
+
+/* The answer, shown on request. It is the answer itself, so it is set in
+   the mono face like every other value on the site. */
+.card-help {
+  margin: 12px auto 0;
+  max-width: 46ch;
+  font-family: var(--mono);
+  font-size: var(--t-body);
+  color: var(--ink);
+  background: var(--paper-2);
+  border-left: 2px solid var(--accent);
+  padding: 10px 14px;
+  text-align: left;
+  animation: enter 220ms var(--ease) both;
+}
+
+/* The quiz: four answers, laid out as a grid of labelled cells. */
+.choice-panel { margin-top: 26px; }
+.choice-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: var(--rule-w) solid var(--rule);
+  border-left: var(--rule-w) solid var(--rule);
+}
+
+.choice-btn {
+  font: inherit;
+  font-family: var(--mono);
+  font-size: 1.06rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 16px 12px;
+  border: 0;
+  border-right: var(--rule-w) solid var(--rule);
+  border-bottom: var(--rule-w) solid var(--rule);
+  background: transparent;
+  color: var(--ink);
+  transition: background-color var(--dur) var(--ease);
+}
+.choice-btn:hover { background: var(--paper-2); }
+.choice-btn.correct { color: var(--c-good); background: color-mix(in srgb, var(--c-good) 12%, transparent); }
+.choice-btn.wrong { color: var(--c-again); background: color-mix(in srgb, var(--c-again) 12%, transparent); }
+.choice-btn[disabled] { cursor: default; }
+.choice-btn[disabled]:hover { background: transparent; }
+.choice-btn.correct[disabled]:hover { background: color-mix(in srgb, var(--c-good) 12%, transparent); }
+.choice-btn.wrong[disabled]:hover { background: color-mix(in srgb, var(--c-again) 12%, transparent); }
+
+@media (min-width: 520px) {
+  .choice-buttons { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* A chord diagram: monospace, several lines, drawn like a tab chart. */
+.flashcard.chord-card .card-question {
+  font-family: var(--mono);
+  font-size: .82rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+  white-space: pre;
+  color: var(--ink);
+}
+.flashcard.chord-card .card-question.back { color: var(--accent); }
+
+/* The chord chart on the statistics screen: a root-by-family table. */
+.grid-lg.chord-map {
+  grid-template-columns: repeat(var(--map-cols, 13), minmax(0, 1fr));
+  max-width: 720px;
+}
+.grid-lg.chord-map .cell { font-size: .58rem; }
+
+/*
+ * A chord chart has many more columns than a times table, so on a narrow
+ * screen it is wider than the page. Rather than squeeze the cells until
+ * the names are cut off, the chart scrolls sideways.
+ */
+@media (max-width: 760px) {
+  .grid-lg.chord-map {
+    max-width: none;
+    min-width: 760px;
+    font-size: .62rem;
+  }
+  .grid-lg.chord-map .cell { font-size: .62rem; }
+  .map-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: .5rem;
+  }
+}
+
+/* Grades — a labelled scale, not four coloured blobs. */
+.grade-panel { margin-top: 28px; }
+.grade-hint { text-align: center; color: var(--ink-2); font-size: var(--t-small); margin-bottom: 12px; }
+
+.grade-buttons { display: grid; grid-template-columns: repeat(4, 1fr); border-top: var(--rule-w) solid var(--rule); border-left: var(--rule-w) solid var(--rule); }
+
+.grade-btn {
+  font: inherit; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 13px 8px;
+  border: 0;
+  border-right: var(--rule-w) solid var(--rule);
+  border-bottom: var(--rule-w) solid var(--rule);
+  background: transparent;
+  color: var(--ink);
+  transition: background-color var(--dur) var(--ease);
+  position: relative;
+}
+.grade-btn::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: currentColor;
+}
+.grade-btn .grade-name { font-weight: 500; font-size: .92rem; }
+.grade-btn .grade-time { font-family: var(--mono); font-size: .72rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.grade-btn:hover { background: var(--paper-2); }
+.grade-btn:focus-visible { outline-offset: -2px; }
+.grade-1 { color: var(--c-again); }
+.grade-2 { color: var(--c-hard); }
+.grade-3 { color: var(--c-good); }
+.grade-4 { color: var(--c-easy); }
+
+.grade-keys { text-align: center; margin-top: 12px; }
+
+/* Session summary */
+.session-summary { max-width: 640px; margin: 48px auto 0; text-align: center; }
+.session-summary h2 { font-family: var(--serif); font-size: var(--t-h1); margin-bottom: 24px; }
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: var(--rule-w) solid var(--rule);
+  border-left: var(--rule-w) solid var(--rule);
+  margin-bottom: 26px;
+}
+.summary-card { border-right: var(--rule-w) solid var(--rule); border-bottom: var(--rule-w) solid var(--rule); padding: 14px 10px; }
+.summary-card .sc-value { font-family: var(--mono); font-size: 1.32rem; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.summary-card .sc-label { display: block; font-size: var(--t-micro); letter-spacing: .11em; text-transform: uppercase; color: var(--ink-3); margin-top: 3px; }
+.summary-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* --------------------------------------------------------------------------
+   10. Statistics
+   -------------------------------------------------------------------------- */
+
+.page-head {
+  display: flex; align-items: flex-start; gap: 20px;
+  padding-bottom: 20px; margin-bottom: 26px;
+  border-bottom: var(--rule-w) solid var(--rule);
+}
+.page-head h1 { font-family: var(--serif); font-size: var(--t-h1); font-weight: 600; letter-spacing: -.02em; }
+.page-head .sub { color: var(--ink-2); font-size: var(--t-small); margin-top: 4px; }
+
+.section { margin-top: 40px; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 10px; margin-bottom: 16px; border-bottom: var(--rule-w) solid var(--rule); }
+.section-head h2 { font-family: var(--serif); font-size: 1.08rem; font-weight: 600; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); border-top: var(--rule-w) solid var(--rule); border-left: var(--rule-w) solid var(--rule); }
+.kpi { border-right: var(--rule-w) solid var(--rule); border-bottom: var(--rule-w) solid var(--rule); padding: 14px 16px; }
+.kpi .label { display: block; margin-bottom: 5px; }
+.kpi b { font-family: var(--mono); font-size: 1.4rem; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -.02em; line-height: 1; }
+.kpi small { display: block; font-size: var(--t-micro); color: var(--ink-3); margin-top: 4px; }
+
+.breakdown { display: flex; flex-direction: column; }
+.bd-row { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 14px; padding: 7px 0; }
+.bd-name { font-size: var(--t-small); color: var(--ink-2); }
+.bd-track { height: 6px; background: var(--paper-3); border-radius: 1px; overflow: hidden; }
+.bd-track span { display: block; height: 100%; background: var(--ink-3); }
+.bd-row[data-tone="learning"] .bd-track span { background: var(--c-again); }
+.bd-row[data-tone="young"] .bd-track span { background: var(--c-hard); }
+.bd-row[data-tone="mature"] .bd-track span { background: var(--c-good); }
+.bd-row[data-tone="leech"] .bd-track span { background: var(--c-again); opacity: .6; }
+.bd-count { font-family: var(--mono); font-size: .84rem; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+.forecast { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; align-items: end; }
+.fc-col { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.fc-bar { width: 100%; min-height: 3px; background: var(--accent); border-radius: 1px 1px 0 0; transition: height 600ms var(--ease); }
+.fc-count { font-family: var(--mono); font-size: .8rem; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.fc-day { font-size: var(--t-micro); color: var(--ink-3); letter-spacing: .08em; text-transform: uppercase; }
+
+.weak-list { display: flex; flex-direction: column; }
+.weak-row {
+  display: grid; grid-template-columns: 84px 1fr 60px 56px;
+  align-items: center; gap: 16px;
+  padding: 9px 0; border-bottom: var(--rule-w) solid var(--rule);
+  font-size: var(--t-small);
+}
+.weak-row:last-child { border-bottom: 0; }
+.weak-q { font-family: var(--mono); font-weight: 500; white-space: pre; }
+
+/* A chord shape is a drawing six lines wide and up to twenty-one
+   characters across. In the narrow column of the list it would be
+   squeezed into an unreadable block, so a deck whose face is a drawing
+   gets a wider column and a smaller face. */
+.weak-row.chord-card { grid-template-columns: 178px 1fr 60px 56px; }
+.weak-row.chord-card .weak-q { font-size: .66rem; line-height: 1.45; font-weight: 400; }
+
+.weak-bar { height: 5px; background: var(--paper-3); border-radius: 1px; overflow: hidden; }
+.weak-bar span { display: block; height: 100%; background: var(--c-again); }
+.weak-acc { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.weak-time { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-3); }
+
+.activity { display: grid; grid-template-columns: repeat(14, 1fr); gap: 5px; align-items: end; height: 96px; }
+.ac-col { display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+.ac-bar { width: 100%; background: var(--ink-3); border-radius: 1px 1px 0 0; min-height: 2px; }
+.ac-day { font-family: var(--mono); font-size: .6rem; color: var(--ink-3); }
+
+/* --------------------------------------------------------------------------
+   11. Settings drawer
+   -------------------------------------------------------------------------- */
+
+.scrim { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, .45); animation: fade 200ms var(--ease) both; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 61;
+  width: min(400px, 100%);
+  background: var(--paper);
+  border-left: var(--rule-w) solid var(--rule-2);
+  box-shadow: var(--shadow-pop);
+  display: flex; flex-direction: column;
+  animation: slide 280ms var(--ease) both;
+}
+@keyframes slide { from { transform: translateX(100%); } to { transform: none; } }
+
+.drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: var(--rule-w) solid var(--rule); }
+.drawer-head h2 { font-family: var(--serif); font-size: 1.1rem; font-weight: 600; }
+.drawer-body { padding: 20px; overflow-y: auto; flex: 1; }
+
+.group { margin-bottom: 32px; }
+.group > .label { display: block; padding-bottom: 10px; margin-bottom: 14px; border-bottom: var(--rule-w) solid var(--rule); }
+
+.field { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; margin-bottom: 4px; }
+/* Explicit placement: the label and its value share the first row, the
+   slider spans the second. Without this the <output> is auto-placed into
+   column 1 of a new row and stretches across it. */
+.field-label { font-size: var(--t-small); grid-column: 1; grid-row: 1; }
+.field input[type="range"] { grid-column: 1 / -1; grid-row: 2; width: 100%; accent-color: var(--accent); }
+.field output {
+  grid-column: 2; grid-row: 1;
+  font-family: var(--mono); font-variant-numeric: tabular-nums;
+  border: var(--rule-w) solid var(--rule-2); border-radius: var(--r);
+  padding: 1px 8px; font-size: .82rem;
+  justify-self: end; min-width: 54px; text-align: center;
+}
+.group > .small { margin: 2px 0 18px; }
+
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 11px 0; cursor: pointer; }
+.switch-row strong { display: block; font-size: var(--t-small); font-weight: 500; }
+.switch-row small { display: block; font-size: var(--t-micro); color: var(--ink-3); }
+.switch-row input { position: absolute; opacity: 0; pointer-events: none; }
+.switch { flex: none; width: 34px; height: 19px; border-radius: 999px; background: var(--paper-3); border: var(--rule-w) solid var(--rule-2); position: relative; transition: all var(--dur) var(--ease); }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: var(--ink-3); transition: all var(--dur) var(--ease); }
+.switch-row input:checked + .switch { background: var(--accent); border-color: var(--accent); }
+.switch-row input:checked + .switch::after { transform: translateX(15px); background: var(--on-accent); }
+.switch-row input:focus-visible + .switch { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.danger-zone { margin-top: 26px; padding-top: 18px; border-top: var(--rule-w) solid var(--rule); }
+.danger-zone h4 { font-size: var(--t-small); font-weight: 600; color: var(--c-again); margin-bottom: 4px; }
+.danger-zone .btn { margin-top: 8px; }
+
+/* --------------------------------------------------------------------------
+   12. Toast & colophon
+   -------------------------------------------------------------------------- */
+
+.toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+  z-index: 90;
+  background: var(--ink); color: var(--paper);
+  border-radius: var(--r);
+  padding: 9px 18px;
+  font-size: var(--t-small);
+  box-shadow: var(--shadow-pop);
+  animation: enter 240ms var(--ease) both;
+}
+
+.colophon {
+  /* width: 100% is needed: as a flex item in the column .app-shell, the
+     `margin: 0 auto` would otherwise shrink it to its content instead of
+     stretching it, and the footer would sit narrower than the page. */
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 22px clamp(16px, 4vw, 40px) 40px;
+  border-top: var(--rule-w) solid var(--rule);
+  display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  font-size: var(--t-micro);
+  color: var(--ink-3);
+  letter-spacing: .04em;
+}
+.colophon a { color: var(--ink-3); text-decoration: underline; text-underline-offset: 3px; }
+.colophon a:hover { color: var(--ink); }
+
+/* Two groups: what the app is, and where to find the source. */
+.colophon-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.colophon-links { align-items: flex-end; text-align: right; }
+.colophon-oss { color: var(--ink-2); }
+
+/* --------------------------------------------------------------------------
+   13. Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .deck-row { grid-template-columns: 1fr; gap: 14px; }
+  .deck-row-figures { gap: 20px; }
+  .deck-row-go { justify-content: flex-start; }
+  .lede { grid-template-columns: 1fr; align-items: start; }
+}
+
+@media (max-width: 720px) {
+  .masthead-meta .meta-item:nth-child(3) { display: none; }
+  .wordmark-text small { display: none; }
+  .grade-buttons { grid-template-columns: repeat(2, 1fr); }
+  .study-hud { width: 100%; }
+  .study-bar { flex-wrap: wrap; }
+  .grid-lg { max-width: none; }
+  .activity { grid-template-columns: repeat(7, 1fr); }
+  .weak-row { grid-template-columns: 74px 1fr 54px; }
+  /* The chord drawing still needs its own room on a phone. */
+  .weak-row.chord-card { grid-template-columns: 142px 1fr 54px; }
+  .weak-row.chord-card .weak-q { font-size: .58rem; }
+  .weak-time { display: none; }
+  .colophon { flex-direction: column; gap: 6px; }
+}
+
+@media (max-width: 460px) {
+  .masthead-inner { gap: 12px; height: 56px; }
+  .masthead-meta { gap: 14px; }
+  .deck-row-figures { gap: 16px; }
+  .figure { min-width: 52px; }
+}
+
+/* --------------------------------------------------------------------------
+   14. Preferences
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+@media print {
+  .masthead, .drawer, .scrim, .grade-panel, .reveal-btn, .toast { display: none !important; }
+  body { background: #fff; color: #000; }
+  body::before { display: none; }
+}

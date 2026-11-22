@@ -1,0 +1,27 @@
+# kartice.sokak.app .htaccess
+# Kontrola kesiranja da deploy izmene budu vidljive odmah
+
+# CSS/JS: bez kesa, uvek svez fajl
+<FilesMatch "\.(css|js)$">
+  Header set Cache-Control "no-cache, no-store, must-revalidate"
+  Header set Pragma "no-cache"
+  Header set Expires "0"
+</FilesMatch>
+
+# HTML: bez kesa - dovoljno za brze izmene
+<FilesMatch "\.html$">
+  Header set Cache-Control "no-cache, no-store, must-revalidate"
+  Header set Pragma "no-cache"
+  Header set Expires "0"
+</FilesMatch>
+
+# Slike i ostali staticni asset-i: 7 dana
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico|woff2?)$">
+  Header set Cache-Control "public, max-age=604800"
+</FilesMatch>
+
+# Osnovno preusmerenje: bez www
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]

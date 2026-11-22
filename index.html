@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="sr-Latn" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Kartice za učenje sa pamćenjem na razmak i merenjem tačnosti, brzine i efikasnosti.">
+<meta name="theme-color" content="#131311">
+<title>Kartice — za pamćenje</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='none' stroke='%23c1442c' stroke-width='7'><rect x='16' y='24' width='68' height='52' rx='3'/><path d='M16 40h68'/></g></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Preskoči na sadržaj</a>
+
+<div class="app-shell">
+
+  <!-- ================= Masthead ================= -->
+  <header class="masthead">
+    <div class="masthead-inner">
+      <a class="wordmark" href="#/">
+        <svg class="wordmark-mark" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="16" rx="2"/>
+          <path d="M3 9h18"/>
+        </svg>
+        <span class="wordmark-text">
+          <b>Kartice</b>
+          <small>za pamćenje</small>
+        </span>
+      </a>
+
+      <div class="masthead-meta">
+        <div class="meta-item"><span>Nivo</span><b id="stat-level">1</b></div>
+        <div class="meta-item"><span>Poeni</span><b id="stat-xp">0</b></div>
+        <div class="meta-item"><span>Niz</span><b id="stat-streak">0</b></div>
+      </div>
+
+      <div class="masthead-actions">
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Zameni temu" title="Zameni temu">
+          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+            <path class="icon-sun" d="M12 3v2m0 14v2M5.6 5.6l1.4 1.4m10 10 1.4 1.4M3 12h2m14 0h2M5.6 18.4 7 17m10-10 1.4-1.4"/>
+            <circle class="icon-sun" cx="12" cy="12" r="4"/>
+            <path class="icon-moon" d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="settings-btn" type="button" aria-label="Podešavanja" title="Podešavanja">
+          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+            <path d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="rail"><span id="level-bar-fill"></span></div>
+  </header>
+
+  <!-- ================= Main ================= -->
+  <main id="main" class="main">
+
+    <!-- ---------- Deck picker ---------- -->
+    <section id="view-decks" class="view" hidden>
+      <div class="lede">
+        <div>
+          <h1>Kako funkcioniše</h1>
+          <p>Izaberi paket karata i odgovaraj na pitanja. Svaka kartica dobija jednu
+             od četiri ocene — ponovo, teško, dobro, lako — a
+             <em>FSRS-6 raspored</em>
+             određuje kada se kartica vraća: prvo posle nekoliko minuta, zatim posle
+             jednog dana, na kraju posle nedelja i meseci. To je
+             <a href="https://docs.ankiweb.net/faqs/what-spaced-repetition-algorithm"
+                target="_blank" rel="noopener noreferrer"
+                title="FSRS u Anki priručniku — objašnjenje modela pamćenja">Free Spaced Repetition Scheduler</a>,
+             algoritam koji zavisno od tvojih ocena procenjuje koliko ćeš se kartice
+             sećati za mesec dana. Kartice se izdaju nasumično,
+             a ne po zadatom redosledu. Napredak ostaje u ovom pretraživaču — bez
+             naloga, bez servera, bez slanja podataka.</p>
+        </div>
+      </div>
+
+      <div class="deck-list" id="deck-list"></div>
+
+      <section class="ledger">
+        <div class="ledger-head">
+          <h2>Pregled učenja</h2>
+          <span class="label" id="overview-sub"></span>
+        </div>
+        <div class="ledger-grid" id="overview-grid"></div>
+      </section>
+    </section>
+
+    <!-- ---------- Study session ---------- -->
+    <section id="view-study" class="view" hidden>
+      <div class="study-bar">
+        <button class="btn btn-quiet" id="exit-study" type="button">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          <span>Nazad</span>
+        </button>
+        <button class="btn btn-quiet" id="undo-btn" type="button" hidden
+                title="Vrati poslednji odgovor (U)">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 14 4 9l5-5"/>
+            <path d="M4 9h10a6 6 0 0 1 0 12h-3"/>
+          </svg>
+          <span>Vrati</span>
+        </button>
+        <span class="deck-name" id="study-deck-name">—</span>
+        <span class="deck-sub" id="study-progress">—</span>
+        <span class="spacer"></span>
+        <div class="study-hud">
+          <div class="figure"><span>Poeni</span><b id="hud-points">0</b></div>
+          <div class="figure"><span>Tačnost</span><b id="hud-accuracy">—</b></div>
+          <div class="figure"><span>Niz tačnih</span><b id="hud-combo">0</b></div>
+        </div>
+      </div>
+
+      <div class="study-progress"><span id="study-progress-fill"></span></div>
+
+      <div class="card-stage" id="card-stage">
+        <div class="flashcard" id="flashcard" tabindex="-1">
+          <div class="flashcard-inner">
+            <div class="flashcard-face flashcard-front">
+              <span class="label" id="card-tag"></span>
+              <div class="card-question" id="card-question">—</div>
+              <div class="card-input-row" id="card-input-wrap">
+                <input id="card-input" class="card-input" type="text" inputmode="text"
+                       autocomplete="off" autocapitalize="off" spellcheck="false"
+                       placeholder="?" aria-label="Tvoj odgovor">
+              </div>
+              <div class="card-feedback" id="card-feedback" hidden></div>
+              <button class="btn btn-quiet reveal-btn" id="reveal-btn" type="button">Prikaži odgovor <kbd>Enter</kbd></button>
+            </div>
+            <div class="flashcard-face flashcard-back">
+              <span class="label" id="card-tag-back"></span>
+              <div class="card-question back" id="card-answer">—</div>
+              <div class="card-back-meta" id="card-back-meta"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-tools">
+          <button class="btn btn-quiet help-btn" id="help-btn" type="button">Pomoć <kbd>P</kbd></button>
+          <div class="card-help" id="card-help" hidden></div>
+        </div>
+
+        <div class="choice-panel" id="choice-panel" hidden>
+          <p class="grade-hint">Izaberi tačan odgovor.</p>
+          <div class="choice-buttons" id="choice-buttons"></div>
+        </div>
+
+        <div class="grade-panel" id="grade-panel" hidden>
+          <p class="grade-hint" id="grade-hint">Koliko dobro si se setio?</p>
+          <div class="grade-buttons" id="grade-buttons">
+            <button class="grade-btn grade-1" data-grade="1" type="button">
+              <span class="grade-name">Ponovo</span><span class="grade-time" data-interval="1">—</span>
+            </button>
+            <button class="grade-btn grade-2" data-grade="2" type="button">
+              <span class="grade-name">Teško</span><span class="grade-time" data-interval="2">—</span>
+            </button>
+            <button class="grade-btn grade-3" data-grade="3" type="button">
+              <span class="grade-name">Dobro</span><span class="grade-time" data-interval="3">—</span>
+            </button>
+            <button class="grade-btn grade-4" data-grade="4" type="button">
+              <span class="grade-name">Lako</span><span class="grade-time" data-interval="4">—</span>
+            </button>
+          </div>
+          <p class="grade-keys muted small">Tastatura: <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> · <kbd>U</kbd> vraća · <kbd>Esc</kbd> izlaz</p>
+        </div>
+      </div>
+
+      <div class="session-summary" id="session-summary" hidden>
+        <h2>Sesija je završena</h2>
+        <div class="summary-cards" id="summary-cards"></div>
+        <div class="summary-actions">
+          <button class="btn btn-primary" id="summary-again" type="button">Još jedna runda</button>
+          <button class="btn" id="summary-exit" type="button">Nazad na pakete</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- Deck detail / stats ---------- -->
+    <section id="view-stats" class="view" hidden>
+      <div class="page-head">
+        <button class="btn btn-quiet" id="stats-back" type="button">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          <span>Nazad</span>
+        </button>
+        <div>
+          <h1 id="stats-title">Statistika</h1>
+          <p class="sub" id="stats-sub"></p>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="kpi-grid"></div>
+
+      <section class="section">
+        <div class="section-head">
+          <h2 id="table-map-title">Pregled paketa</h2>
+          <span class="label" id="table-map-label">—</span>
+        </div>
+        <div class="map-scroll">
+          <div class="grid-lg" id="table-map"></div>
+        </div>
+        <div class="legend" id="table-legend"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><h2>Sastav paketa</h2></div>
+        <div class="breakdown" id="breakdown"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Predviđeni dolazak kartica</h2>
+          <span class="label">narednih 7 dana</span>
+        </div>
+        <div class="forecast" id="forecast"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Najteže kartice</h2>
+          <span class="label">po tačnosti</span>
+        </div>
+        <div class="weak-list" id="weak-list"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><h2>Poslednjih 14 dana</h2></div>
+        <div class="activity" id="activity-chart"></div>
+      </section>
+    </section>
+
+  </main>
+
+  <!-- ================= Colophon ================= -->
+  <footer class="colophon">
+    <div class="colophon-group">
+      <span>Kartice · FSRS-6 raspored · podaci u kolačićima ovog pretraživača</span>
+      <span>bez naloga, bez servera, bez slanja podataka</span>
+    </div>
+    <div class="colophon-group colophon-links">
+      <span class="colophon-oss">otvoreni kod — <a href="https://github.com/banegrbic/kartice" target="_blank" rel="noopener noreferrer">GitHub</a></span>
+      <span>portfolio: <a href="https://sokak.app/" target="_blank" rel="noopener noreferrer">sokak.app</a></span>
+    </div>
+  </footer>
+
+  <!-- ================= Settings drawer ================= -->
+  <div class="scrim" id="drawer-backdrop" hidden></div>
+  <aside class="drawer" id="settings-drawer" hidden aria-label="Podešavanja">
+    <div class="drawer-head">
+      <h2>Podešavanja</h2>
+      <button class="icon-btn" id="drawer-close" type="button" aria-label="Zatvori">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <section class="group">
+        <span class="label">Učenje</span>
+
+        <label class="field">
+          <span class="field-label">Nove kartice po danu</span>
+          <input type="range" id="set-new-per-day" min="5" max="60" step="5">
+          <output id="out-new-per-day">20</output>
+        </label>
+        <p class="muted small">Koliko novih kartica se uvodi u jednom danu. Manje = sporije ali temeljnije.</p>
+
+        <label class="field">
+          <span class="field-label">Ciljana retencija</span>
+          <input type="range" id="set-retention" min="0.70" max="0.97" step="0.01">
+          <output id="out-retention">90%</output>
+        </label>
+        <p class="muted small">Željeni procenat zapamćivanja. Viši = češće ponavljanje, niži = ređe.</p>
+
+        <label class="switch-row">
+          <span>
+            <strong>Unos sa tastature</strong>
+            <small class="muted">Upiši odgovor umesto da biraš ocenu</small>
+          </span>
+          <input type="checkbox" id="set-typed">
+          <span class="switch" aria-hidden="true"></span>
+        </label>
+
+        <label class="switch-row">
+          <span>
+            <strong>Nasumičan redosled</strong>
+            <small class="muted">Kartice se izdaju nasumično, a ne po zadatom redosledu</small>
+          </span>
+          <input type="checkbox" id="set-random-order">
+          <span class="switch" aria-hidden="true"></span>
+        </label>
+
+        <label class="switch-row">
+          <span>
+            <strong>Prikaži intervale</strong>
+            <small class="muted">Koliko će kartica čekati do sledećeg ponavljanja</small>
+          </span>
+          <input type="checkbox" id="set-intervals">
+          <span class="switch" aria-hidden="true"></span>
+        </label>
+      </section>
+
+      <section class="group">
+        <span class="label">Podaci</span>
+        <p class="muted small" id="storage-info">—</p>
+
+        <button class="btn btn-block" id="export-btn" type="button">Izvezi podatke (JSON)</button>
+
+        <div class="danger-zone">
+          <h4>Resetuj</h4>
+          <p class="muted small">Ponovno biraj pakete i počni od početka. Ovo se ne može vratiti.</p>
+          <button class="btn btn-danger btn-block" id="reset-scores" type="button">Poeni i statistika</button>
+          <button class="btn btn-danger btn-block" id="reset-decks" type="button">Napredak svih paketa</button>
+          <button class="btn btn-danger btn-block" id="reset-all" type="button">Sve</button>
+        </div>
+      </section>
+    </div>
+  </aside>
+
+  <!-- ================= Toast ================= -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+</div>
+
+<!-- The engine knows no subject. Each deck file registers itself when it
+     loads, so the order of the deck list is the order of these tags:
+     the two focused table decks, then the combined one, then the chords. -->
+<script src="js/fsrs.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/deck-registry.js"></script>
+<script src="js/deck-tablica-mnozenje.js"></script>
+<script src="js/deck-tablica-deljenje.js"></script>
+<script src="js/deck-tablica.js"></script>
+<script src="js/deck-akordi.js"></script>
+<script src="js/scoring.js"></script>
+<script src="js/state.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
